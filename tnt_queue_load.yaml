@@ -1,0 +1,25 @@
+pools:
+  - id: tnt_queue_gun
+    gun:
+        type: tnt_queue_gun
+        target:
+            - localhost:3301
+            - localhost:3302
+        user: admin
+        pass: queue-app-cluster-cookie
+    ammo:
+        type: tarantool_call_provider
+        source:
+            type: file
+            path: ./tnt_queue_json.ammo
+    result:
+        type: phout
+        destination: ./phout.log
+    rps:
+        duration: 60s
+        type: line
+        from: 25000
+        to: 35000
+    startup:
+        type: once
+        times: 1000

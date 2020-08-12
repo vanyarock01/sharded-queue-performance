@@ -1,0 +1,29 @@
+queue-app.router-1:
+  workdir: ./tmp/db_dev/3301
+  advertise_uri: localhost:3301
+  http_port: 8081
+
+queue-app.router-2:
+  workdir: ./tmp/db_dev/3302
+  advertise_uri: localhost:3302
+  http_port: 8082
+
+queue-app.s1-master:
+  workdir: ./tmp/db_dev/3303
+  advertise_uri: localhost:3303
+  http_port: 8083
+
+queue-app.s1-replica:
+  workdir: ./tmp/db_dev/3304
+  advertise_uri: localhost:3304
+  http_port: 8084
+
+queue-app.s2-master:
+  workdir: ./tmp/db_dev/3305
+  advertise_uri: localhost:3305
+  http_port: 8085
+
+queue-app.s2-replica:
+  workdir: ./tmp/db_dev/3306
+  advertise_uri: localhost:3306
+  http_port: 8086
