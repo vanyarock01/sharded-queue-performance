@@ -18,8 +18,8 @@ pools:
     rps:
         duration: 60s
         type: line
-        from: 25000
-        to: 35000
+        from: 20000
+        to: 25000
     startup:
         type: once
         times: 1000
