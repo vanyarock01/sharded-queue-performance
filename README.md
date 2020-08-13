@@ -69,6 +69,7 @@ docker run -v $(pwd):/var/loadtest      \
            -it direvius/yandex-tank
 ```
 NOTE
+
 Для docker for mac может понадобиться заменить `localhost` на алиас `host.docker.internal` в файле [tnt_queue_load.yaml](./tnt_queue_load.yaml).
 
 
