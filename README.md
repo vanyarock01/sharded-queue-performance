@@ -1,7 +1,17 @@
 # sharded-queue-performance
+
 Нагрузочное тестирование шардированной очереди на базе Tarantool + Cartridge с использованием Pandora + Yandex.Tank
 
-## Сборка пушки
+## Инструменты
+
+Понадобятся:
+
+- [Docker](https://docs.docker.com/engine/install/) 18.XX+
+- [Tarantool](https://www.tarantool.io/en/download/)
+- [cartridge-cli](https://github.com/tarantool/cartridge-cli#installation)
+- опционально [Golang](https://golang.org/doc/install) 1.13+
+
+## Собираем пушку
 
 1. Если go есть в системе:
     ```shell
@@ -16,33 +26,30 @@
     ./build.sh
     ```
 
-## Подготовка среды для приложения
+## Собираем приложение
 
-Необходимые компоненты для установки и работы нашего приложения: tarantool и cartridge-cli.
-Инструкцию по установке можно найти [тут](https://github.com/tarantool/cartridge-cli#installation).
-
-В случае успеха перейдем в директорию с приложением и установим зависимости:
-```
-cd queue-app
-tarantoolctl rocks make
+```shell
+$ cd queue-app
+$ cartridge build
 ```
 
-## Запуск приложения и конфигурация кластера
+## Запускаем приложения и настраиваем кластер
 
 Для запуска инстансов кластера:
-```
-cartridge start
+
+```shell
+$ cartridge start
 ```
 
 Конфигурацию кластера выполним скриптом bootstrap.lua:
-```
-tarantool bootstrap.lua
+```shell
+$ tarantool bootstrap.lua
 ```
 
 В случае успеха, по адресу [localhost:8081](localhost:8081) в браузере будет видная следующая конфигурация кластера:
 ![](./media/cluster.png)
 
-## Создание очереди для тестирования
+## Создаем очереди для тестирования
 
 В терминах sharded-queue экземпляр очереди - труба (tube). Создать ее можно, как через бинарное апи, так и через конфигурацию кластера. Воспользуемся вторым методом.
 
@@ -57,20 +64,19 @@ test-tube:
 
 Остается нажать кнопку *Apply* и дождаться сообщения об успешном выполнении операции.
 
-## Запуск нагрузочного тестирования
+## Запускаем нагрузочные тесты
 
-```
-cd ..
+```shell
+$ cd ..
 
-docker run -v $(pwd):/var/loadtest      \
+$ docker run -v $(pwd):/var/loadtest      \
            -v $SSH_AUTH_SOCK:/ssh-agent \
            -e SSH_AUTH_SOCK=/ssh-agent  \
            --net host                   \
            -it direvius/yandex-tank
 ```
-NOTE
 
-Для docker for mac может понадобиться заменить `localhost` на алиас `host.docker.internal` в файле [tnt_queue_load.yaml](./tnt_queue_load.yaml).
+**NOTE** Для docker for mac может понадобиться заменить `localhost` на алиас `host.docker.internal` в файле [tnt_queue_load.yaml](./tnt_queue_load.yaml).
 
 
 Более детальную информацию про установку и настройку Yandex.Tank можно найти в [документации](https://yandextank.readthedocs.io/en/latest/install.html).
