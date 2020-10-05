@@ -19,7 +19,7 @@
            github.com/spf13/afero            \
            github.com/yandex/pandora
     
-    go build tnt_queue_gun.go
+    GOOS=linux GOARCH=amd64 go build tnt_queue_gun.go
     ```
 2. Если go нет в системе, но есть докер:
     ```shell
@@ -38,7 +38,7 @@ $ cartridge build
 Для запуска инстансов кластера:
 
 ```shell
-$ cartridge start
+$ cartridge start -d
 ```
 
 Конфигурацию кластера выполним скриптом bootstrap.lua:
