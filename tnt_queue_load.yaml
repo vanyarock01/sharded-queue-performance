@@ -3,8 +3,8 @@ pools:
     gun:
         type: tnt_queue_gun
         target:
-            - localhost:3301
-            - localhost:3302
+            - localhost:3301 # replace by host.docker.internal:3301 if you use mac
+            - localhost:3302 # replace by host.docker.internal:3302 if you use mac
         user: admin
         pass: queue-app-cluster-cookie
     ammo:
@@ -22,4 +22,4 @@ pools:
         to: 25000
     startup:
         type: once
-        times: 1000
+        times: 10
