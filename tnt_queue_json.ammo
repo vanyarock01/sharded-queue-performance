@@ -1,2 +1,2 @@
-{"Method": "put", "TubeName": "test-tube", "Params": {"data": "task"} }
-{"Method": "take", "TubeName": "test-tube"}
+{"Collector": "summ_origin", "min": 0.0, "max": 1.0}
+{"Collector": "summ_origin", "min": 100.0, "max": 1000000.0}

@@ -4,7 +4,7 @@ phantom:
 pandora:
     enabled: true
     package: yandextank.plugins.Pandora
-    pandora_cmd: ./tnt_queue_gun
+    pandora_cmd: ./sharded-queue-performance
     config_file: ./tnt_queue_load.yaml
 
 console:

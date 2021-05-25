@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
-	"time"
 	"math/rand"
+	"time"
 
 	"github.com/tarantool/go-tarantool"
 
@@ -17,9 +17,9 @@ import (
 )
 
 type Ammo struct {
-	Method   string
-	TubeName string
-	Params   map[string] interface {}
+	Collector string
+	Min       float64
+	Max       float64
 }
 
 func customAmmoProvider() core.Ammo {
@@ -27,15 +27,15 @@ func customAmmoProvider() core.Ammo {
 }
 
 type GunConfig struct {
-	Target []string `validate:"required"`
-	User   string   `validate:"required"`
-	Pass   string   `validate:"required"`
+	Target string `validate:"required"`
+	User   string `validate:"required"`
+	Pass   string
 }
 
 type Gun struct {
 	conn *tarantool.Connection
-	conf   GunConfig
-	aggr   core.Aggregator
+	conf GunConfig
+	aggr core.Aggregator
 }
 
 func NewGun(conf GunConfig) *Gun {
@@ -46,10 +46,11 @@ func NewGun(conf GunConfig) *Gun {
 
 func (g *Gun) Bind(aggr core.Aggregator, deps core.GunDeps) error {
 	conn, err := tarantool.Connect(
-		g.conf.Target[rand.Intn(len(g.conf.Target))],
+		g.conf.Target,
 		tarantool.Opts{
-			User: g.conf.User,
-			Pass: g.conf.Pass,
+			User:    g.conf.User,
+			Pass:    g.conf.Pass,
+			Timeout: 3000 * time.Millisecond,
 		},
 	)
 
@@ -69,32 +70,30 @@ func makeArgs(args ...interface{}) []interface{} {
 	return args
 }
 
-func (g *Gun) queueCall(tube string, method string, args ...interface{}) (*tarantool.Response, error) {
-	return g.conn.Call(fmt.Sprintf("queue.tube.%s:%s", tube, method), makeArgs(args))
+func ParseData(data []interface{}) uint64 {
+	return data[0].([]interface{})[0].(uint64)
 }
 
 func (g *Gun) Shoot(coreAmmo core.Ammo) {
 	ammo := coreAmmo.(*Ammo)
-	sample := netsample.Acquire(ammo.Method)
+	sample := netsample.Acquire(ammo.Collector)
 
 	code := 200
-	var err error
-	startTime := time.Now()
-	switch ammo.Method {
-	case "put":
-		_, err = g.queueCall(ammo.TubeName, "put", ammo.Params["data"])
-	case "take":
-		_, err = g.queueCall(ammo.TubeName, "take")
-	}
-	sample.SetLatency(time.Since(startTime))
+	var latency time.Duration
+	log.Println(ammo.Min + (rand.Float64() * (ammo.Max - ammo.Min)))
+	resp, err := g.conn.Call("observe", []interface{}{ammo.Collector, ammo.Min + (rand.Float64() * (ammo.Max - ammo.Min))})
 	if err != nil {
-		log.Printf("Error %s task: %s", ammo.Method, err)
+		log.Printf("Error %s task: %s", "observe", err)
 		code = 500
+	} else {
+		latency = time.Duration(ParseData(resp.Data) * 1000)
+		// log.Println(latency)
+		sample.SetLatency(latency)
 	}
 
 	defer func() {
 		sample.SetProtoCode(code)
-		sample.AddTag(ammo.TubeName)
+		sample.SetUserDuration(latency)
 		g.aggr.Report(sample)
 	}()
 }
@@ -106,9 +105,9 @@ func main() {
 	coreimport.RegisterCustomJSONProvider("tarantool_call_provider", customAmmoProvider)
 	register.Gun("tnt_queue_gun", NewGun, func() GunConfig {
 		return GunConfig{
-			Target: []string{"localhost:3301"},
-			User:   "guest",
-			Pass:   "",
+			Target: "localhost:3302",
+			User:   "U",
+			Pass:   "X",
 		}
 	})
 	cli.Run()
